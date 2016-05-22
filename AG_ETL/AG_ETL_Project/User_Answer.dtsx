@@ -1,0 +1,808 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="4/22/2016 4:17:31 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="IS129-BI-DW02"
+  DTS:CreatorName="PASSPORT\tutkushev"
+  DTS:DTSID="{C82CCA20-038B-4291-8728-6E777E8AAE99}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="12.0.4100.1"
+  DTS:LocaleID="1049"
+  DTS:ObjectName="User_Answer"
+  DTS:PackageType="5"
+  DTS:VersionBuild="23"
+  DTS:VersionGUID="{2EFD1725-1F7E-4F62-9314-3ABF9FA70967}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[(local).AG_DW.ImportUser]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{B21F0981-640A-40B7-A0CC-99E5FF2142F6}"
+      DTS:ObjectName="(local).AG_DW.ImportUser">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectionString="Data Source=(local);User ID=ImportUser;Initial Catalog=AG_DW;Provider=SQLNCLI11.1;Persist Security Info=True;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[AG.BIReader]"
+      DTS:CreationName="ODBC"
+      DTS:DTSID="{C7585F06-9172-444D-9B6D-9C0EC67C01A2}"
+      DTS:ObjectName="AG.BIReader">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectionString="uid=BIReader;Dsn=AG;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{09DE6F27-196C-4ECE-A76C-04876072CE2D}"
+      DTS:IncludeInDebugDump="6789"
+      DTS:Namespace="User"
+      DTS:ObjectName="IDBegin">
+      <DTS:VariableValue
+        DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{42F3BD2A-F1B5-4524-B8BA-03681CB8B385}"
+      DTS:IncludeInDebugDump="6789"
+      DTS:Namespace="User"
+      DTS:ObjectName="IDEnd">
+      <DTS:VariableValue
+        DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{EC5B2326-65AF-4056-B8ED-A221E250D6E5}"
+      DTS:IncludeInDebugDump="6789"
+      DTS:Namespace="User"
+      DTS:ObjectName="Increment">
+      <DTS:VariableValue
+        DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\For Loop Container 1"
+      DTS:AssignExpression="@Increment = @IDBegin + 200000"
+      DTS:CreationName="STOCK:FORLOOP"
+      DTS:Description="For Loop Container"
+      DTS:DTSID="{5FD52073-4862-4A2D-8775-496F0765F9D0}"
+      DTS:EvalExpression="@IDBegin &lt; @IDEnd"
+      DTS:ExecutableType="STOCK:FORLOOP"
+      DTS:LocaleID="-1"
+      DTS:MaxConcurrent="1"
+      DTS:ObjectName="For Loop Container 1">
+      <DTS:Variables />
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package\For Loop Container 1\Data Flow Task"
+          DTS:CreationName="Microsoft.Pipeline"
+          DTS:Description="Data Flow Task"
+          DTS:DTSID="{C12BCDF9-4D0C-41B9-B42C-90C72FEC77DF}"
+          DTS:ExecutableType="Microsoft.Pipeline"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="Data Flow Task"
+          DTS:TaskContact="Performs high-performance data extraction, transformation and loading;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+          <DTS:Variables />
+          <DTS:PropertyExpression
+            DTS:Name="[agstat_user_answers Source].[SqlCommand]">"select
+ua.id,
+ua.modified as create_date,
+ua.ag_id as user_id,
+ua.answer_id,
+ua.question_id,
+ua.poll_id,
+ua.answer_value1 as title
+from agstat_user_answers ua
+where ua.ag_id is not null and (select count(*) from agstat_users_poll_status where status_id = 3 and ag_id=ua.ag_id and poll_id=ua.poll_id)&gt;0
+and ua.id &gt; " +(DT_WSTR,30)@[User::IDBegin]+ "
+and ua.id &lt;= " +(DT_WSTR,30)@[User::Increment]</DTS:PropertyExpression>
+          <DTS:ObjectData>
+            <pipeline
+              version="1">
+              <components>
+                <component
+                  refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source"
+                  componentClassID="Attunity.SSISODBCSrc"
+                  contactInfo="ODBC Source;Connector for Open Database Connectivity (ODBC) by Attunity; Attunity Ltd.; All Rights Reserved; http://www.attunity.com;2"
+                  description="ODBC Source"
+                  name="agstat_user_answers Source"
+                  usesDispositions="true"
+                  version="2">
+                  <properties>
+                    <property
+                      dataType="System.String"
+                      description="The name of the table to be fetched."
+                      expressionType="Notify"
+                      name="TableName"></property>
+                    <property
+                      dataType="System.String"
+                      description="The SQL command to be executed."
+                      expressionType="Notify"
+                      name="SqlCommand">select
+ua.id,
+ua.modified as create_date,
+ua.ag_id as user_id,
+ua.answer_id,
+ua.question_id,
+ua.poll_id,
+ua.answer_value1 as title
+from agstat_user_answers ua
+where ua.ag_id is not null and (select count(*) from agstat_users_poll_status where status_id = 3 and ag_id=ua.ag_id and poll_id=ua.poll_id)&gt;0
+and ua.id &gt; 0
+and ua.id &lt;= 0</property>
+                    <property
+                      dataType="System.Int32"
+                      description="Specify the number of rows fetched per batch."
+                      expressionType="Notify"
+                      name="BatchSize">1000</property>
+                    <property
+                      dataType="System.Int32"
+                      description="Determines the chunk size allocation for LOB columns"
+                      expressionType="Notify"
+                      name="LobChunkSize">32768</property>
+                    <property
+                      dataType="System.Boolean"
+                      description="Determines how the component exposes CHAR columns. If False, CHAR columns are exposed as (multi-)byte strings (DT_STR), if True, CHAR columns are exposed as wide strings (DT_WSTR)"
+                      expressionType="Notify"
+                      name="ExposeCharColumnsAsUnicode">false</property>
+                    <property
+                      dataType="System.Int32"
+                      description="The number of seconds to wait for an SQL statement to execute before returning to the application."
+                      expressionType="Notify"
+                      name="StatementTimeout">0</property>
+                    <property
+                      dataType="System.Int32"
+                      description="The code page to use when code page information is unavailable from the data source."
+                      expressionType="Notify"
+                      name="DefaultCodePage">1251</property>
+                    <property
+                      dataType="System.Int32"
+                      description="The mode used to access the database."
+                      name="AccessMode"
+                      typeConverter="AccessMode">1</property>
+                    <property
+                      dataType="System.Int32"
+                      description="The method used for fetching data."
+                      expressionType="Notify"
+                      name="FetchMethod"
+                      typeConverter="FetchMethod">1</property>
+                    <property
+                      dataType="System.Int32"
+                      description="The ODBC C data type for binding numeric data."
+                      expressionType="Notify"
+                      name="BindNumericAs"
+                      typeConverter="BindNumericAs">0</property>
+                    <property
+                      dataType="System.Int32"
+                      description="Determines how the component would bind columns of (multi)-byte string types (i.e., SQL_CHAR, SQL_VARCHAR, SQL_LONGVARCHAR). The options are: Unicode (SQL_C_WCHAR) and ANSI (SQL_C_CHAR)."
+                      expressionType="Notify"
+                      name="BindCharColumnsAs"
+                      typeConverter="BindCharColumnsAs">0</property>
+                  </properties>
+                  <connections>
+                    <connection
+                      refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Connections[ODBCConnection]"
+                      connectionManagerID="Package.ConnectionManagers[AG.BIReader]"
+                      connectionManagerRefId="Package.ConnectionManagers[AG.BIReader]"
+                      description="The ODBC runtime connection"
+                      name="ODBCConnection" />
+                  </connections>
+                  <outputs>
+                    <output
+                      refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output]"
+                      errorRowDisposition="FailComponent"
+                      name="ODBC Source Output"
+                      truncationRowDisposition="IgnoreFailure">
+                      <outputColumns>
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[id]"
+                          dataType="i4"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[id]"
+                          name="id" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[create_date]"
+                          dataType="dbTimeStamp"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[create_date]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[create_date]"
+                          name="create_date" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[user_id]"
+                          dataType="i4"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[user_id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[user_id]"
+                          name="user_id" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[answer_id]"
+                          dataType="i4"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[answer_id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[answer_id]"
+                          name="answer_id" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[question_id]"
+                          dataType="i4"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[question_id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[question_id]"
+                          name="question_id" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[poll_id]"
+                          dataType="i4"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[poll_id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[poll_id]"
+                          name="poll_id" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[title]"
+                          dataType="wstr"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[title]"
+                          length="255"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[title]"
+                          name="title" />
+                      </outputColumns>
+                      <externalMetadataColumns
+                        isUsed="True">
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[id]"
+                          dataType="i4"
+                          name="id" />
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[create_date]"
+                          dataType="dbTimeStamp"
+                          name="create_date" />
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[user_id]"
+                          dataType="i4"
+                          name="user_id" />
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[answer_id]"
+                          dataType="i4"
+                          name="answer_id" />
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[question_id]"
+                          dataType="i4"
+                          name="question_id" />
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[poll_id]"
+                          dataType="i4"
+                          name="poll_id" />
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[title]"
+                          dataType="wstr"
+                          length="255"
+                          name="title" />
+                      </externalMetadataColumns>
+                    </output>
+                    <output
+                      refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output]"
+                      isErrorOut="true"
+                      name="ODBC Source Error Output">
+                      <outputColumns>
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[id]"
+                          dataType="i4"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[id]"
+                          name="id" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[create_date]"
+                          dataType="dbTimeStamp"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[create_date]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[create_date]"
+                          name="create_date" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[user_id]"
+                          dataType="i4"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[user_id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[user_id]"
+                          name="user_id" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[answer_id]"
+                          dataType="i4"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[answer_id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[answer_id]"
+                          name="answer_id" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[question_id]"
+                          dataType="i4"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[question_id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[question_id]"
+                          name="question_id" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[poll_id]"
+                          dataType="i4"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[poll_id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[poll_id]"
+                          name="poll_id" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[title]"
+                          dataType="wstr"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].ExternalColumns[title]"
+                          length="255"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[title]"
+                          name="title" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[ErrorCode]"
+                          dataType="i4"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[ErrorCode]"
+                          name="ErrorCode"
+                          specialFlags="1" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[ErrorColumn]"
+                          dataType="i4"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Error Output].Columns[ErrorColumn]"
+                          name="ErrorColumn"
+                          specialFlags="2" />
+                      </outputColumns>
+                      <externalMetadataColumns />
+                    </output>
+                  </outputs>
+                </component>
+                <component
+                  refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination"
+                  componentClassID="Microsoft.OLEDBDestination"
+                  contactInfo="OLE DB Destination;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;4"
+                  description="OLE DB Destination"
+                  name="User_Answer Destination"
+                  usesDispositions="true"
+                  version="4">
+                  <properties>
+                    <property
+                      dataType="System.Int32"
+                      description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out."
+                      name="CommandTimeout">0</property>
+                    <property
+                      dataType="System.String"
+                      description="Specifies the name of the database object used to open a rowset."
+                      name="OpenRowset">[dbo].[User_Answer]</property>
+                    <property
+                      dataType="System.String"
+                      description="Specifies the variable that contains the name of the database object used to open a rowset."
+                      name="OpenRowsetVariable"></property>
+                    <property
+                      dataType="System.String"
+                      description="The SQL command to be executed."
+                      name="SqlCommand"
+                      UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor"></property>
+                    <property
+                      dataType="System.Int32"
+                      description="Specifies the column code page to use when code page information is unavailable from the data source."
+                      name="DefaultCodePage">1251</property>
+                    <property
+                      dataType="System.Boolean"
+                      description="Forces the use of the DefaultCodePage property value when describing character data."
+                      name="AlwaysUseDefaultCodePage">false</property>
+                    <property
+                      dataType="System.Int32"
+                      description="Specifies the mode used to access the database."
+                      name="AccessMode"
+                      typeConverter="AccessMode">3</property>
+                    <property
+                      dataType="System.Boolean"
+                      description="Indicates whether the values supplied for identity columns will be copied to the destination. If false, values for identity columns will be auto-generated at the destination. Applies only if fast load is turned on."
+                      name="FastLoadKeepIdentity">false</property>
+                    <property
+                      dataType="System.Boolean"
+                      description="Indicates whether the columns containing null will have null inserted in the destination. If false, columns containing null will have their default values inserted at the destination. Applies only if fast load is turned on."
+                      name="FastLoadKeepNulls">false</property>
+                    <property
+                      dataType="System.String"
+                      description="Specifies options to be used with fast load.  Applies only if fast load is turned on."
+                      name="FastLoadOptions">TABLOCK,CHECK_CONSTRAINTS</property>
+                    <property
+                      dataType="System.Int32"
+                      description="Specifies when commits are issued during data insertion.  A value of 0 specifies that one commit will be issued at the end of data insertion.  Applies only if fast load is turned on."
+                      name="FastLoadMaxInsertCommitSize">2147483647</property>
+                  </properties>
+                  <connections>
+                    <connection
+                      refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Connections[OleDbConnection]"
+                      connectionManagerID="Package.ConnectionManagers[(local).AG_DW.ImportUser]"
+                      connectionManagerRefId="Package.ConnectionManagers[(local).AG_DW.ImportUser]"
+                      description="The OLE DB runtime connection used to access the database."
+                      name="OleDbConnection" />
+                  </connections>
+                  <inputs>
+                    <input
+                      refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input]"
+                      errorOrTruncationOperation="Insert"
+                      errorRowDisposition="FailComponent"
+                      hasSideEffects="true"
+                      name="OLE DB Destination Input">
+                      <inputColumns>
+                        <inputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].Columns[id]"
+                          cachedDataType="i4"
+                          cachedName="id"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[id]" />
+                        <inputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].Columns[create_date]"
+                          cachedDataType="dbTimeStamp"
+                          cachedName="create_date"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[create_date]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[create_date]" />
+                        <inputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].Columns[user_id]"
+                          cachedDataType="i4"
+                          cachedName="user_id"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[user_id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[user_id]" />
+                        <inputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].Columns[answer_id]"
+                          cachedDataType="i4"
+                          cachedName="answer_id"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[answer_id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[answer_id]" />
+                        <inputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].Columns[question_id]"
+                          cachedDataType="i4"
+                          cachedName="question_id"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[question_id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[question_id]" />
+                        <inputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].Columns[poll_id]"
+                          cachedDataType="i4"
+                          cachedName="poll_id"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[poll_id]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[poll_id]" />
+                        <inputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].Columns[title]"
+                          cachedDataType="wstr"
+                          cachedLength="255"
+                          cachedName="title"
+                          externalMetadataColumnId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[title]"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output].Columns[title]" />
+                      </inputColumns>
+                      <externalMetadataColumns
+                        isUsed="True">
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[id]"
+                          dataType="i4"
+                          name="id" />
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[create_date]"
+                          dataType="dbDate"
+                          name="create_date" />
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[user_id]"
+                          dataType="i4"
+                          name="user_id" />
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[answer_id]"
+                          dataType="i4"
+                          name="answer_id" />
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[question_id]"
+                          dataType="i4"
+                          name="question_id" />
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[poll_id]"
+                          dataType="i4"
+                          name="poll_id" />
+                        <externalMetadataColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input].ExternalColumns[title]"
+                          dataType="nText"
+                          name="title" />
+                      </externalMetadataColumns>
+                    </input>
+                  </inputs>
+                  <outputs>
+                    <output
+                      refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Outputs[OLE DB Destination Error Output]"
+                      exclusionGroup="1"
+                      isErrorOut="true"
+                      name="OLE DB Destination Error Output"
+                      synchronousInputId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input]">
+                      <outputColumns>
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]"
+                          dataType="i4"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]"
+                          name="ErrorCode"
+                          specialFlags="1" />
+                        <outputColumn
+                          refId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]"
+                          dataType="i4"
+                          lineageId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]"
+                          name="ErrorColumn"
+                          specialFlags="2" />
+                      </outputColumns>
+                      <externalMetadataColumns />
+                    </output>
+                  </outputs>
+                </component>
+              </components>
+              <paths>
+                <path
+                  refId="Package\For Loop Container 1\Data Flow Task.Paths[ODBC Source Output]"
+                  endId="Package\For Loop Container 1\Data Flow Task\User_Answer Destination.Inputs[OLE DB Destination Input]"
+                  name="ODBC Source Output"
+                  startId="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source.Outputs[ODBC Source Output]" />
+              </paths>
+            </pipeline>
+          </DTS:ObjectData>
+        </DTS:Executable>
+        <DTS:Executable
+          DTS:refId="Package\For Loop Container 1\Set IDBegin"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{D0C5DD96-0630-4A6C-B902-935F42EBFC05}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="Set IDBegin"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+          DTS:ThreadHint="0">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{B21F0981-640A-40B7-A0CC-99E5FF2142F6}"
+              SQLTask:SqlStatementSource="select ISNULL(max(id),0) as LocalMaxID from User_Answer"
+              SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ResultBinding
+                SQLTask:ResultName="LocalMaxID"
+                SQLTask:DtsVariableName="User::IDBegin" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+      <DTS:PrecedenceConstraints>
+        <DTS:PrecedenceConstraint
+          DTS:refId="Package\For Loop Container 1.PrecedenceConstraints[Constraint]"
+          DTS:CreationName=""
+          DTS:DTSID="{4D6E5882-D696-4C79-9A3C-9595162C4079}"
+          DTS:From="Package\For Loop Container 1\Data Flow Task"
+          DTS:LogicalAnd="True"
+          DTS:ObjectName="Constraint"
+          DTS:To="Package\For Loop Container 1\Set IDBegin" />
+      </DTS:PrecedenceConstraints>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\Get IDBegin 1"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{AB6FD01E-16F2-4381-B654-29173C6F5732}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="Get IDBegin 1"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{B21F0981-640A-40B7-A0CC-99E5FF2142F6}"
+          SQLTask:SqlStatementSource="select ISNULL(max(id),0) as LocalMaxID from User_Answer"
+          SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding
+            SQLTask:ResultName="LocalMaxID"
+            SQLTask:DtsVariableName="User::IDBegin" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\Get IDEnd 1"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{093025EC-32BD-407F-AE50-057F7C6167E6}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="Get IDEnd 1"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2014; © 2014 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="1">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{C7585F06-9172-444D-9B6D-9C0EC67C01A2}"
+          SQLTask:SqlStatementSource="select max(id)::integer as RemoteMaxID from agstat_user_answers"
+          SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding
+            SQLTask:ResultName="1"
+            SQLTask:DtsVariableName="User::IDEnd" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 1 1]"
+      DTS:CreationName=""
+      DTS:DTSID="{E44C2F0E-F35B-4963-A562-330D1412719F}"
+      DTS:From="Package\Get IDBegin 1"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 1 1"
+      DTS:To="Package\For Loop Container 1" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 2]"
+      DTS:CreationName=""
+      DTS:DTSID="{ADC6176C-0374-4A9D-A0EF-27FAF4906B49}"
+      DTS:From="Package\Get IDEnd 1"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 2"
+      DTS:To="Package\For Loop Container 1" />
+  </DTS:PrecedenceConstraints>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="sql12">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="8" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml">
+        <NodeLayout
+          Size="151,42"
+          Id="Package\For Loop Container 1\Data Flow Task"
+          TopLeft="44,34" />
+        <NodeLayout
+          Size="135,42"
+          Id="Package\For Loop Container 1\Set IDBegin"
+          TopLeft="52,121" />
+        <EdgeLayout
+          Id="Package\For Loop Container 1.PrecedenceConstraints[Constraint]"
+          TopLeft="119.5,76">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,45"
+              Start="0,0"
+              End="0,37.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,37.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <ContainerLayout
+          HeaderHeight="43"
+          IsExpanded="True"
+          PanelSize="241,198"
+          Size="241,241"
+          Id="Package\For Loop Container 1"
+          TopLeft="98.5,166" />
+        <NodeLayout
+          Size="136,42"
+          Id="Package\Get IDBegin 1"
+          TopLeft="60,61" />
+        <NodeLayout
+          Size="128,42"
+          Id="Package\Get IDEnd 1"
+          TopLeft="258,60" />
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 1 1]"
+          TopLeft="128,103">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="52.1666666666667,63"
+              Start="0,0"
+              End="52.1666666666667,55.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,33.5507007419621" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,33.5507007419621"
+                    Point2="0,37.5507007419621"
+                    Point3="4,37.5507007419621" />
+                  <mssgle:LineSegment
+                    End="48.1666666666667,37.5507007419621" />
+                  <mssgle:CubicBezierSegment
+                    Point1="48.1666666666667,37.5507007419621"
+                    Point2="52.1666666666667,37.5507007419621"
+                    Point3="52.1666666666667,41.5507007419621" />
+                  <mssgle:LineSegment
+                    End="52.1666666666667,55.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 2]"
+          TopLeft="322,102">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-64.1666666666667,64"
+              Start="0,0"
+              End="-64.1666666666667,56.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,34.1467436108821" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,34.1467436108821"
+                    Point2="0,38.1467436108821"
+                    Point3="-4,38.1467436108821" />
+                  <mssgle:LineSegment
+                    End="-60.1666666666667,38.1467436108821" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-60.1666666666667,38.1467436108821"
+                    Point2="-64.1666666666667,38.1467436108821"
+                    Point3="-64.1666666666667,42.1467436108821" />
+                  <mssgle:LineSegment
+                    End="-64.1666666666667,56.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+  <TaskHost
+    design-time-name="Package\For Loop Container 1\Data Flow Task">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="4" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml">
+        <NodeLayout
+          Size="197,42"
+          Id="Package\For Loop Container 1\Data Flow Task\User_Answer Destination"
+          TopLeft="114,149" />
+        <NodeLayout
+          Size="214,42"
+          Id="Package\For Loop Container 1\Data Flow Task\agstat_user_answers Source"
+          TopLeft="108,41" />
+        <EdgeLayout
+          Id="Package\For Loop Container 1\Data Flow Task.Paths[ODBC Source Output]"
+          TopLeft="213.75,83">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,66"
+              Start="0,0"
+              End="0,58.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,58.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </TaskHost>
+  <PipelineComponentMetadata
+    design-time-name="Package\For Loop Container 1\Data Flow Task\User_Answer Destination">
+    <Properties>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+      <Property>
+        <Name>TableInfoObjectType</Name>
+        <Value
+          type="q2:string">Table</Value>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>
